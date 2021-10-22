@@ -7,7 +7,7 @@ async function validateAuthorization(authorization) {
     }
     if(!authorization.includes("Bearer ")) return {
         isValid: false,
-        statusCode: 422
+        statusCode: 400
     }
     const token = authorization.replace("Bearer ", "");
 

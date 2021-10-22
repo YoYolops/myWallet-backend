@@ -2,12 +2,13 @@ import bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
 
 import connection from '../database/database.js';
-import { userSchema } from '../schemas.js';
+import { userSchema, loginSchema } from '../schemas.js';
 
 async function auth(req, res) {
+    if(loginSchema.validate(req.body).error) return res.sendStatus(422)
     const { email, password } = req.body;
     try {
-        const dbResponse = await connection.query('SELECT * FROM users WHERE email = $1', [email])
+        const dbResponse = await connection.query('SELECT * FROM users WHERE email = $1;', [email])
         if(!dbResponse.rows.length) return res.sendStatus(404);
 
         const user = dbResponse.rows[0]
@@ -15,14 +16,14 @@ async function auth(req, res) {
         delete user.password
         
         const isUserAlreadyLogged = await connection.query(
-            `SELECT * FROM sessions WHERE "userId" = ${user.id}`
+            `SELECT * FROM sessions WHERE "userId" = ${user.id};`
         )
 
         if(isUserAlreadyLogged.rows.length) return res.sendStatus(400);
 
         const token = uuid()
         await connection.query(
-            'INSERT INTO sessions (token, "userId")  VALUES ($1, $2)',
+            'INSERT INTO sessions (token, "userId")  VALUES ($1, $2);',
             [ token, Number(user.id) ]
         )
             
@@ -44,7 +45,7 @@ async function register(req, res) {
     try {
         const hashPassword = bcrypt.hash(req.body.password, 10)
         const isEmailAlreadyRegistered = connection.query(
-            'SELECT * FROM users WHERE email = $1',
+            'SELECT * FROM users WHERE email = $1;',
             [req.body.email]
         )
     
@@ -55,7 +56,7 @@ async function register(req, res) {
         if(resIsEmailAlreadyRegistered.rows.length) return res.sendStatus(409)
     
         await connection.query(
-            'INSERT INTO users (name, email, password) VALUES ($1, $2, $3)',
+            'INSERT INTO users (name, email, password) VALUES ($1, $2, $3);',
             [ req.body.name, req.body.email, resHashPassword ]
         )
     
@@ -74,7 +75,7 @@ async function logout(req, res) {
     if(!token) return res.sendStatus(422)
 
     try {
-        const dbResponse = await connection.query('DELETE FROM sessions WHERE token = $1', [ token ])
+        const dbResponse = await connection.query('DELETE FROM sessions WHERE token = $1;', [ token ])
         if(!dbResponse.rowCount) return res.sendStatus(405)
 
         return res.sendStatus(200)
