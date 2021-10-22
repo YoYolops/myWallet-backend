@@ -70,8 +70,9 @@ async function register(req, res) {
 }
 
 async function logout(req, res) {
-    /* Adaptation needed to it can use Utis function for token validation */
+    /* Adaptation needed so it can use Utis function for token validation */
     const token = req.headers.authorization?.replace("Bearer ", "");
+    console.log(token)
     if(!token) return res.sendStatus(422)
 
     try {
