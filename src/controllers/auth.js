@@ -71,9 +71,8 @@ async function register(req, res) {
 
 async function logout(req, res) {
     /* Adaptation needed so it can use Utis function for token validation */
-    const token = req.headers.authorization?.replace("Bearer ", "");
-    console.log(token)
-    if(!token) return res.sendStatus(422)
+    const token = await Utils.validateAuthorization(req.headers.authorization)
+    if(!token.isValid) return res.sendStatus(token.statusCode)
 
     try {
         const dbResponse = await connection.query('DELETE FROM sessions WHERE token = $1;', [ token ])

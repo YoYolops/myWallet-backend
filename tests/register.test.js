@@ -66,7 +66,12 @@ describe("POST /register", () => {
             password: "yoyo"
         }
 
-        const result = await supertest(app).post("/register").send(body);
+        const result = await supertest(app)
+            .post("/register")
+            .send(body)
+            .expect(res => {
+                console.log(res.body)
+            });
         const status = result.statusCode
         expect(status).toEqual(201)
     })
