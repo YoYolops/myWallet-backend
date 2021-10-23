@@ -28,7 +28,7 @@ async function auth(req, res) {
         )
             
         delete user.id
-        return res.send({
+        return res.status(200).send({
             ...user,
             token
         })
