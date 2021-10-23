@@ -6,7 +6,8 @@ describe("POST /auth", () => {
     beforeAll(async () => {
         await connection.query('DELETE FROM users;')
         await connection.query('DELETE FROM sessions;')
-        await connection.query('INSERT INTO users (name, email, password) VALUES (yoyo, yoyo@gmail.com, 123);')
+        const resp = await connection.query('INSERT INTO users (name, email, password) VALUES (yoyo, yoyo@gmail.com, 123);')
+        console.log(resp)
     })
 
     it("auth POST /auth with empty username", async () => {
