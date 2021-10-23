@@ -2,7 +2,7 @@ import app from '../src/index';
 import supertest from 'supertest';
 import connection from '../src/database/database';
 
-describe("POST /auth", async () => {
+describe("POST /auth", () => {
     beforeAll(async () => {
         await connection.query('DELETE FROM users;')
         await connection.query('DELETE FROM sessions;')
