@@ -6,9 +6,9 @@ export const loginSchema = Joi.object({
 })
 
 export const userSchema = Joi.object({
-    name: Joi.string().required(),
+    name: Joi.string().min(1).required(),
     email: Joi.string().required().email({ tlds: { allow: false } }),
-    password: Joi.string().required()
+    password: Joi.string().min(1).required()
 })
 
 export const entrieSchema = Joi.object({
