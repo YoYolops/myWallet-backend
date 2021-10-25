@@ -15,7 +15,7 @@ async function registerEntry(req, res) {
         if(!token.isValid) return res.sendStatus(token.statusCode);
 
         await connection.query(
-            'INSERT INTO entries (id, date, description, value, "userId") VALUES ($1, $2, $3, $4);',
+            'INSERT INTO entries (date, description, value, "userId") VALUES ($1, $2, $3, $4);',
             [ date, description, value, token.userId ]
         )
 

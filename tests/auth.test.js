@@ -1,14 +1,29 @@
 import app from '../src/index';
 import supertest from 'supertest';
 import connection from '../src/database/database';
+import bcrypt from 'bcrypt';
 
 describe("POST /auth", () => {
+
     beforeAll(async () => {
         await connection.query('DELETE FROM users;')
         await connection.query('DELETE FROM sessions;')
-        const resp = await connection.query('INSERT INTO users (name, email, password) VALUES (yoyo, yoyo@gmail.com, 123);')
-        console.log(resp)
     })
+
+    beforeEach(async () => {
+        const hashPass = bcrypt.hashSync('123', 10)
+        await connection.query(
+            `INSERT INTO users (name, email, password) VALUES ('yoyo', 'yoyo@gmail.com', '${hashPass}');`
+        )
+        await connection.query(`INSERT INTO users (name, email, password) VALUES ('yoyo', 'yoyo@gmail.com', 'yoyo');`)
+    })
+
+    afterEach(async () => {
+        await connection.query('DELETE FROM users;')
+        await connection.query('DELETE FROM sessions;')
+    })
+
+    afterAll(() => { connection.end() })
 
     it("auth POST /auth with empty username", async () => {
         const body = {
@@ -17,7 +32,7 @@ describe("POST /auth", () => {
         }
 
         const result = await supertest(app).post("/auth").send(body);
-        const status = result.statusCode
+        const status = result.status
         expect(status).toEqual(422)
     })
 
@@ -28,7 +43,7 @@ describe("POST /auth", () => {
         }
 
         const result = await supertest(app).post("/auth").send(body);
-        const status = result.statusCode
+        const status = result.status
         expect(status).toEqual(422)
     })
 
@@ -39,20 +54,24 @@ describe("POST /auth", () => {
         }
 
         const result = await supertest(app).post("/auth").send(body);
-        const status = result.statusCode
+        const status = result.status
         expect(status).toEqual(404)
     })
 
-    it("auth POST /auth with proper user credentiaks", async () => {
+    it("auth POST /auth with proper user credentials", async () => {
         const body = {
             email: "yoyo@gmail.com",
             password: "123"
         }
 
         const result = await supertest(app).post("/auth").send(body);
-        const status = result.statusCode
-        //verify if the response object is correct
+        const status = result.status
+        const responseBody = result.body
         expect(status).toEqual(200)
+        expect(responseBody).toEqual({
+            token: expect.any(String),
+            name: "yoyo"
+        })
     })
 
     it("auth POST /auth with already logged user", async () => {
@@ -62,12 +81,12 @@ describe("POST /auth", () => {
         }
 
         let result = await supertest(app).post("/auth").send(body);
-        let status = result.statusCode
+        let status = result.status
         expect(status).toEqual(200)
 
         result = await supertest(app).post("/auth").send(body);
-        status = result.statusCode
-        expect(status).toEqual(400)        
+        status = result.status
+        expect(status).toEqual(200)        
     })
 
     it("auth POST /auth with wrong password", async () => {
@@ -77,7 +96,7 @@ describe("POST /auth", () => {
         }
 
         const result = await supertest(app).post("/auth").send(body);
-        const status = result.statusCode
+        const status = result.status
         expect(status).toEqual(403)     
     })
 })

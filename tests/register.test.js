@@ -6,7 +6,15 @@ describe('POST /register', () => {
     beforeAll(async () => {
         await connection.query('DELETE FROM users;')
         await connection.query('DELETE FROM sessions;')
-        await connection.query('INSERT INTO users (name, email, password) VALUES (yoyo, yoyo@gmail.com, yoyo);')
+    })
+
+    beforeEach(async () => {
+        await connection.query(`INSERT INTO users (name, email, password) VALUES ('yoyo', 'yoyo@gmail.com', 'yoyo');`)
+    })
+
+    afterEach(async () => {
+        await connection.query('DELETE FROM users;')
+        await connection.query('DELETE FROM sessions;')
     })
 
     afterAll(() => { connection.end() })
@@ -19,7 +27,7 @@ describe('POST /register', () => {
         }
 
         const result = await supertest(app).post('/register').send(body);
-        const status = result.statusCode
+        const status = result.status
         expect(status).toEqual(422)
     })
 
@@ -31,7 +39,7 @@ describe('POST /register', () => {
         }
 
         const result = await supertest(app).post('/register').send(body);
-        const status = result.statusCode
+        const status = result.status
         expect(status).toEqual(422)
     })
 
@@ -43,7 +51,7 @@ describe('POST /register', () => {
         }
 
         const result = await supertest(app).post('/register').send(body);
-        const status = result.statusCode
+        const status = result.status
         expect(status).toEqual(422)
     })
 
@@ -55,7 +63,7 @@ describe('POST /register', () => {
         }
 
         const result = await supertest(app).post('/register').send(body);
-        const status = result.statusCode
+        const status = result.status
         expect(status).toEqual(409)
     })
 
@@ -66,13 +74,8 @@ describe('POST /register', () => {
             password: 'yoyo'
         }
 
-        const result = await supertest(app)
-            .post('/register')
-            .send(body)
-            .expect(res => {
-                console.log(res.body)
-            });
-        const status = result.statusCode
+        const result = await supertest(app).post('/register').send(body)
+        const status = result.status
         expect(status).toEqual(201)
     })
 })

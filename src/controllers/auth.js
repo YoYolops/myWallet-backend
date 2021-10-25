@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
 
+import Utils from '../utils/utils.js';
 import connection from '../database/database.js';
 import { userSchema, loginSchema } from '../schemas.js';
 
@@ -15,11 +16,10 @@ async function auth(req, res) {
         if(!bcrypt.compareSync(password, user.password)) return res.sendStatus(403);
         delete user.password
         
-        const isUserAlreadyLogged = await connection.query(
-            `SELECT * FROM sessions WHERE "userId" = ${user.id};`
+        await connection.query(
+            `DELETE FROM sessions WHERE "userId" = $1;`,
+            [user.id]
         )
-
-        if(isUserAlreadyLogged.rows.length) return res.sendStatus(400);
 
         const token = uuid()
         await connection.query(
@@ -27,9 +27,8 @@ async function auth(req, res) {
             [ token, Number(user.id) ]
         )
             
-        delete user.id
         return res.status(200).send({
-            ...user,
+            name: user.name,
             token
         })
     } catch(e) {
@@ -70,7 +69,6 @@ async function register(req, res) {
 }
 
 async function logout(req, res) {
-    /* Adaptation needed so it can use Utis function for token validation */
     const token = await Utils.validateAuthorization(req.headers.authorization)
     if(!token.isValid) return res.sendStatus(token.statusCode)
 
