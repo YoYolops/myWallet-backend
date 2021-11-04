@@ -17,9 +17,9 @@ routes.post("/auth", auth)
 routes.post("/register", register)
 routes.post("/entries", registerEntry)
 
-routes.delete("/entries", deleteEntry)
+routes.delete("/entries/:id", deleteEntry)
 
-routes.put("/entries", updateEntry)
+routes.put("/entries/:id", updateEntry)
 
 
 export default routes;

@@ -73,8 +73,10 @@ async function logout(req, res) {
     if(!token.isValid) return res.sendStatus(token.statusCode)
 
     try {
-        const dbResponse = await connection.query('DELETE FROM sessions WHERE token = $1;', [ token ])
-        if(!dbResponse.rowCount) return res.sendStatus(405)
+        const dbResponse = await connection.query('DELETE FROM sessions WHERE token = $1;', [ token.token ])
+        if(!dbResponse.rowCount) {
+            return res.sendStatus(405)
+        }
 
         return res.sendStatus(200)
     } catch(e) {
